@@ -5,10 +5,17 @@
 
 using namespace std;
 
+class Heap {
+
+};
+
+class HashMap {
+
+};
+
 int main()
 {
     std::cout << "Hello World!\n";
-    std::count << "hey guys!"; // marcos typed this
     std::cout << "wassup";
 }
 
