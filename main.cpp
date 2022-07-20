@@ -8,6 +8,7 @@ using namespace std;
 int main()
 {
     std::cout << "Hello World!\n";
+    std::count << "hey guys!"; // marcos typed this
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
