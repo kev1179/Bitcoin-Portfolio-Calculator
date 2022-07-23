@@ -56,11 +56,11 @@ long generateTimeStamp(string month, string day, string year, string hour, strin
 
 	t.tm_year = stoi(year) - 1900;  
 	t.tm_mon = months[month];           
-	t.tm_mday = stoi(day);          
+	t.tm_mday = stoi(day);
 	t.tm_hour = stoi(hour);
 	t.tm_min = stoi(minute);
 	t.tm_sec = 0;
-	t.tm_isdst = -1;        
+	t.tm_isdst = -1;
 	t_of_day = mktime(&t);
 
 	return (long)t_of_day;
@@ -111,7 +111,7 @@ int main()
 		cout << "Minute: " << minute << endl;
 		cout << "USD: " << USD << endl;
 
-		cout << generateTimeStamp(month, day, year, hour, minute);
+		cout << generateTimeStamp(month, day, year, hour, minute) << "\n";
 	}
 
 
