@@ -69,6 +69,25 @@ long generateTimeStamp(string month, string day, string year, string hour, strin
 
 }
 
+void populateMap(unordered_map<long, double>& priceMap, ifstream& data) {
+	string line;
+	getline(data, line);
+
+	while (getline(data, line)) {
+		stringstream stream(line);
+		vector<string> tempVector;
+		string temp;
+		while (getline(stream, temp, ',')) {
+			tempVector.push_back(temp);
+		}
+		if (tempVector[7].compare("NaN") != 0) {
+			priceMap[stol(tempVector[0])] = stod(tempVector[7]);
+		}
+		
+	}
+	cout << "DONE!" << endl;
+}
+
 int main()
 {
 	ifstream data("data.csv");
@@ -87,8 +106,13 @@ int main()
 	string minute;
 	string USD;
 
+	unordered_map<long, double> priceMap;
+	//populateMap(priceMap, data);
+
 	//Takes in the user input, generates a time stamp based off the time inputted.
 	//TODO: Fix ending the loop, doesn't work properly right now. If anyone knows how to fix it by all means go ahead
+	double totalBTC = 0.0;
+
 
 	while (true) {
 		getline(cin, month, ' ');
@@ -111,7 +135,12 @@ int main()
 		cout << "Minute: " << minute << endl;
 		cout << "USD: " << USD << endl;
 
-		cout << generateTimeStamp(month, day, year, hour, minute) << "\n";
+		long timeStamp = generateTimeStamp(month, day, year, hour, minute);
+		
+		//double purchaseBTCPrice = priceMap[timestamp];
+		//totalBTC += stod(USD) / purchaseBTCPrice;
+
+		cout << timeStamp << "\n";
 	}
 
 
