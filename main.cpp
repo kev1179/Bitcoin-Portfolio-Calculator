@@ -80,8 +80,8 @@ void populateMap(unordered_map<long, double>& priceMap, ifstream& data) {
 		while (getline(stream, temp, ',')) {
 			tempVector.push_back(temp);
 		}
-		if (tempVector[7].compare("NaN") != 0) {
-			priceMap[stol(tempVector[0])] = stod(tempVector[7]);
+		if (tempVector[1].compare("NaN") != 0) {
+			priceMap[stol(tempVector[0])] = stod(tempVector[1]);
 		}
 		
 	}
@@ -107,7 +107,7 @@ int main()
 	string USD;
 
 	unordered_map<long, double> priceMap;
-	//populateMap(priceMap, data);
+	populateMap(priceMap, data);
 
 	//Takes in the user input, generates a time stamp based off the time inputted.
 	//TODO: Fix ending the loop, doesn't work properly right now. If anyone knows how to fix it by all means go ahead
