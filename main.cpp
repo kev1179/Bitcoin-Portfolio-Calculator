@@ -7,6 +7,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <forward_list>
+#include <list>
 #include <iomanip>
 #include <queue>
 
@@ -99,22 +100,47 @@ public:
     }
 };
 
+template <typename T1, typename T2>
+class Entry
+{
+    T1 key;
+    T2 value;
+public:
+    //Constructor for Entry
+    Entry(T1 key, T2 value)
+    {
+        this->key = key;
+        this->value = value;
+    }
+
+    T1& getKey()
+    {
+        return key;
+    }
+
+    T2& getValue()
+    {
+        return value;
+    }
+};
+
 //TODO: Implement HashMap
 template <typename T1, typename T2>
-class HashMap 
+class HashMap
 {
-private:
-	vector<forward_list<pair<T1, T2>>> hashTable[5]; //If you want to use seperate chaining, I think this will be the easiest way to implement the hashmap
-										//But feel free to use open addressing if you want :)
+    vector<list<Entry<T1, T2>>> hashTable;
     int size;
-	double loadFactor;
     const double maxLoadFactor = 0.8;
 public:
     //Constructor for HashMap
     HashMap()
     {
+        list<Entry<T1, T2>> emptyList;
+        for (int i = 0; i < 5; i++)
+        {
+            hashTable.push_back(emptyList);
+        }
         size = 0;
-        loadFactor = 0.0;
     }
 
     //Hash function
@@ -126,9 +152,11 @@ public:
     //Creates an entirely new hashmap if load factor approached maxLoadFactor
     void rehash()
     {
-        vector<forward_list<pair<T1, T2>>> originalTable = hashTable;
-        hashTable.erase(hashTable.begin(), hashTable.end());
-        hashTable.size() *= 2;
+        vector<list<Entry<T1, T2>>> originalTable = hashTable;
+        hashTable.clear();
+
+        list<Entry<T1, T2>> emptyList;
+        hashTable.resize(originalTable.size() * 2, emptyList);
         size = 0;
 
         for (int i = 0; i < originalTable.size(); i++)
@@ -137,90 +165,63 @@ public:
             {
                 for (auto itr = originalTable[i].begin(); itr != originalTable[i].end(); itr++)
                 {
-                    insert(get<0>(*itr), get<1>(*itr));
+                    insert(itr->getKey(), itr->getValue());
                 }
             }
         }
     }
 
-	//Overloaded subscript operator that allows you to access and modify elements like this: testMap[key] = val;
-    /* NOT DONE YET
-	T2& operator[](T1 key)
-	{
-        int index = hasherFunc(key);
-
-        auto itr = find(key);
-        if (itr == hashTable[index].end())
-        {
-            insert(key, get<1>(*itr));
-        }
-        else
-        {
-
-        }
-        return ;
-	}
-     */
-
-	//Very similar to the [] operator
+	//Inserts entry to hashmap
 	void insert(T1 key, T2 val)
 	{
         int index = hasherFunc(key);
 
-        if (!hashTable[index].empty())
-        {
-            for (auto itr = hashTable[index].begin(); itr != hashTable[index].end(); itr++)
-            {
-                if (key == get<0>(*itr))
-                {
-                    return;
-                }
-            }
-            hashTable[index].push_back(make_pair(key, val));
-            size++;
-        }
-        else
-        {
-            hashTable[index] = {};
-            hashTable[index].push_front(make_pair(key, val));
-            size++;
-        }
+        Entry<T1, T2> entry(key, val);
+        hashTable[index].push_back(entry);
+        size++;
 
-        loadFactor = (double) size / hashTable.size();
-        if (loadFactor == maxLoadFactor)
+        double loadFactor = (double) size / hashTable.size();
+        if (loadFactor >= maxLoadFactor)
         {
             rehash();
         }
 	}
 
-	//Removes a key from the hashmap
+    //Accesses key and returns value
+    T2& access(T1 key)
+    {
+        int index = hasherFunc(key);
+
+        auto itr = find(key, index);
+        T2 value = 0.0;
+
+        if (itr != hashTable[index].end())
+        {
+            value = itr->getValue();
+        }
+        return value;
+    }
+
+	//Removes an entry from the hashmap based on the key
 	void remove(T1 key)
 	{
         int index = hasherFunc(key);
 
-        if (!hashTable[index].empty())
+        auto itr = find(key, index);
+        if (itr != hashTable[index].end())
         {
-            for (auto itr = hashTable[index].begin(); itr != hashTable[index].end(); itr++)
-            {
-                if (key == get<0>(*itr))
-                {
-                    hashTable[index].remove(get<0, 1>(*itr));
-                    return;
-                }
-            }
+            hashTable[index].erase(itr);
         }
 	}
 
     //Finds a key from the hashmap
-    typename forward_list<pair<T1, T2>>::iterator find(T1 key)
+    typename list<Entry<T1, T2>>::iterator find(T1 key, int index)
     {
-        int index = hasherFunc(key);
-
         if (!hashTable[index].empty())
         {
             for (auto itr = hashTable[index].begin(); itr != hashTable[index].end(); itr++)
             {
-                if (key == get<0>(*itr))
+                if (key == itr->getKey())
                 {
                     return itr;
                 }
@@ -229,21 +230,22 @@ public:
         return hashTable[index].end();
     }
 
-    //Returns 1 if key is found in map or 0 otherwise
-    int count(T1 key)
+    //Prints all entries from hashmap
+    void print()
     {
-        int index = hasherFunc(key);
-
-        auto itr = find(key);
-        if (itr != hashTable[index].end())
+        for (int i = 0; i < hashTable.size(); i++)
         {
-            return 1;
+            cout << i << ":";
+            for (auto itr = hashTable[i].begin(); itr != hashTable[i].end(); itr++)
+            {
+                cout << " <" << itr->getKey() << ", " << itr->getValue() << ">";
+            }
+            cout << endl;
         }
-        return 0;
     }
 
-    //Returns # of elements in table
-    int numElements()
+    //Returns # of entries in table
+    int entries()
     {
         return size;
     }
@@ -253,15 +255,6 @@ public:
     {
         return hashTable.size();
     }
-
-    //Returns the loadFactor
-    double load_factor()
-    {
-        return loadFactor;
-    }
-
-	//Feel free to write more functions but this is just a template to get started!
-	//You could also build an iterator if you need something to do.
 };
 
 //Generates a timestamp. Works properly, has been tested using an online converter!
@@ -554,11 +547,11 @@ void mapTest()
     int casesPassed = 0;
     //******************************** CASE 1 *****************************************************************
     HashMap<long,double> test1;
-    //test1.insert(1597262280, 11581.939197);
-    //test1.insert(1597262340, 11572.065746);
-    cout << "A lot of issues, for example the above code doesn't even run. You also need to add a function to access a key" << endl;
-    cout << "For example something like test1.access(1597262280) should return 11581.939197, I need this to test it properly" << endl;
-    cout << "We can code this together on zoom if neccessary" << endl;
+    test1.insert(1597262280, 11581.939197);
+    test1.insert(1597262340, 11572.065746);
+    cout << test1.access(8237489273492) << endl;
+    cout << test1.access(1597262340) << endl;
+    test1.print();
 }
 
 int main()
