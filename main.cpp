@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <forward_list>
 #include <iomanip>
+#include <queue>
 
 using namespace std;
 
@@ -33,8 +34,11 @@ public:
 	}
 
 	//Returns the element at the top of the heap
-	T top()
-		return heap[0];
+    T top()
+    {
+        return heap[0];
+    }
+		
 
 	//Takes out the element at the top and returns it. Here you would need to implement heapify down which can be found in the slides.
 	T extractTop() {
@@ -83,6 +87,15 @@ public:
             heap[parent] = temp;
             heapifyUp(parent);
         }
+    }
+
+    bool empty()
+    {
+        if (size == 0)
+        {
+            return true;
+        }
+        return false;
     }
 };
 
@@ -310,6 +323,7 @@ void populateMap(unordered_map<long, double>& priceMap, ifstream& data)
 	cout << "DONE!" << endl;
 }
 
+/*
 int main()
 {
 	ifstream data("data.csv");
@@ -366,4 +380,194 @@ int main()
 
 	return 0;
 }
+*/
 
+void heapTest()
+{
+
+    int casesPassed = 0;
+    //******************************** CASE 1 *****************************************************************
+    Heap<double> test1("max");
+    priority_queue<double> test1STL;
+    vector<double> values = { 8.2, 100.8, 23.4, 54.1, 1000.0, 121.4, 8.1, 11.0, 7.9, 234.8 };
+
+    for (int i = 0; i < values.size(); i++)
+    {
+        test1.insert(values[i]);
+        test1STL.push(values[i]);
+    }
+
+    vector<double> sorted1;
+    vector<double> sorted1STL;
+
+    while (!test1STL.empty())
+    {
+        sorted1.push_back(test1.extractTop());
+        double temp = test1STL.top();
+        test1STL.pop();
+        sorted1STL.push_back(temp);
+    }
+
+    if (sorted1 != sorted1STL)
+    {
+        cout << "CASE 1 FAILED: max heap sort" << endl;
+    }
+    else
+    {
+        casesPassed++;
+    }
+
+    //*********************************************** CASE 2 ***********************************************
+    Heap<double> test2("max");
+    test2.insert(3.14);
+    test2.insert(3.13);
+    test2.insert(3.141);
+    test2.insert(3.139);
+    test2.insert(3.12);
+    test2.insert(3.13999);
+    test2.insert(3.1401);
+
+    if (test2.extractTop() == 3.141)
+    {
+        casesPassed++;
+    }
+    else
+    {
+        cout << "CASE 2 FAILED: extracting top in a max heap" << endl;
+    }
+
+    //******************************************** CASE 3 *********************************************
+    Heap<double> test3("max");
+    test3.insert(12.6);
+    test3.insert(78.9);
+    test3.insert(87.3);
+    test3.insert(1.24);
+    test3.extractTop();
+    test3.insert(100.89);
+    test3.extractTop();
+    test3.extractTop();
+    test3.extractTop();
+    test3.insert(50.8);
+
+    vector<double> answer = { 50.8, 1.24 };
+    vector<double> testing3;
+
+    while (!test3.empty())
+    {
+        testing3.push_back(test3.extractTop());
+    }
+
+    if (answer == testing3)
+    {
+        casesPassed++;
+    }
+    else
+    {
+        cout << "CASE 3 FAILED: mixing insertions and deletions " << endl;
+    }
+
+    //************************************************** CASE 4 ******************************************************
+    Heap<double> test4("min");
+    priority_queue<double, vector<double>, greater<double>> test4STL;
+    vector<double> values2 = { 8.2, 100.8, 23.4, 54.1, 1000.0, 121.4, 8.1, 11.0, 7.9, 234.8 };
+
+    for (int i = 0; i < values2.size(); i++)
+    {
+        test4.insert(values2[i]);
+        test4STL.push(values2[i]);
+    }
+
+    vector<double> sorted4;
+    vector<double> sorted4STL;
+
+    while (!test4STL.empty())
+    {
+        sorted4.push_back(test4.extractTop());
+        double temp = test4STL.top();
+        test4STL.pop();
+        sorted4STL.push_back(temp);
+    }
+
+    if (sorted4 != sorted4STL)
+    {
+        cout << "CASE 4 FAILED: min heap sort" << endl;
+    }
+    else
+    {
+        casesPassed++;
+    }
+
+    //*********************************************** CASE 5 ***********************************************
+    Heap<double> test5("min");
+    test5.insert(3.14);
+    test5.insert(3.13);
+    test5.insert(3.141);
+    test5.insert(3.139);
+    test5.insert(3.12);
+    test5.insert(3.13999);
+    test5.insert(3.1401);
+
+    if (test5.extractTop() == 3.12)
+    {
+        casesPassed++;
+    }
+    else
+    {
+        cout << "CASE 5 FAILED: extracting top in a min heap" << endl;
+    }
+
+    //******************************************** CASE 6 *********************************************
+    Heap<double> test6("min");
+    test6.insert(12.6);
+    test6.insert(78.9);
+    test6.insert(87.3);
+    test6.insert(1.24);
+    test6.extractTop();
+    test6.insert(100.89);
+    test6.extractTop();
+    test6.extractTop();
+    test6.extractTop();
+    test6.insert(50.8);
+
+    vector<double> answer6 = { 50.8, 100.89 };
+    vector<double> testing6;
+
+    while (!test6.empty())
+    {
+        testing6.push_back(test6.extractTop());
+    }
+
+    if (answer6 == testing6)
+    {
+        casesPassed++;
+    }
+    else
+    {
+        cout << "CASE 6 FAILED: mixing insertions and deletions in min heap" << endl;
+    }
+
+    cout << "Passed " << casesPassed << "/6 cases" << endl;
+}
+
+void mapTest()
+{
+    int casesPassed = 0;
+    //******************************** CASE 1 *****************************************************************
+    HashMap<long,double> test1;
+    //test1.insert(1597262280, 11581.939197);
+    //test1.insert(1597262340, 11572.065746);
+    cout << "A lot of issues, for example the above code doesn't even run. You also need to add a function to access a key" << endl;
+    cout << "For example something like test1.access(1597262280) should return 11581.939197, I need this to test it properly" << endl;
+    cout << "We can code this together on zoom if neccessary" << endl;
+}
+
+int main()
+{
+    cout << "Heap test cases: " << endl;
+    heapTest();
+    cout << "****************************************************************************************************************" << endl;
+    cout << "Hashmap test cases: " << endl;
+    mapTest();
+
+    return 0;
+}
