@@ -13,53 +13,77 @@ using namespace std;
 
 //TODO: Implement Heap
 template <typename T>
-class Heap 
-{
+class Heap {
 private:
 	vector<T> heap;
 	string type; //Would either be "min" or "max"
 	bool isMax;
 	int size;
-
 public:
-
 	//Constructor for heap, specifies which type of heap it is and sets a boolean variable for you to use later.
-	Heap(string type) 
-	{
+	Heap(string type) {
 		heap = {};
 		this->type = type;
 		size = 0;
 
 		if (type.compare("max") == 0)
-		{
 			isMax = true;
-		}
-		else 
-		{
+		else
 			isMax = false;
-		}
-		
 	}
 
 	//Returns the element at the top of the heap
 	T top()
-	{
 		return heap[0];
-	}
 
 	//Takes out the element at the top and returns it. Here you would need to implement heapify down which can be found in the slides.
-	T extractTop()
-	{
-
+	T extractTop() {
+        T top = heap[0];
+        heap[0] = heap[size - 1];
+        heap.pop_back();
+        size--;
+        heapifyDown(0);
+        return top;
 	}
 
 	//Inserts an element into the heap. Here you would need to write heapify up which can also be found in the slides.
-	void insert(T val)
-	{
-
+	void insert(T val) {
+        heap.push_back(val);
+        size++;
+        heapifyUp(size - 1);
 	}
 
-	//Feel free to write more functions but this is just a template to get started!
+	void heapifyDown(int index) {
+	    int left, right, largest;
+
+	    left = 2 * index + 1;
+        right = 2 * index + 2;
+        largest = index;
+
+        if (left < size && (heap[left] > heap[index] || (heap[left] == heap[index] && isMax)))
+            largest = left;
+        if (right < size && (heap[right] > heap[largest] || (heap[right] == heap[largest] && isMax)))
+            largest = right;
+        if (largest != index) {
+            T temp = heap[index];
+            heap[index] = heap[largest];
+            heap[largest] = temp;
+            heapifyDown(largest);
+        }
+    }
+
+    // create heapify up function
+    void heapifyUp(int index) {
+        if (index == 0)
+            return;
+        int parent = (index - 1) / 2;
+        if (heap[index] > heap[parent] || (heap[index] == heap[parent] && isMax)) {
+            T temp = heap[index];
+            heap[index] = heap[parent];
+            heap[parent] = temp;
+            heapifyUp(parent);
+        }
+    }
 };
 
 //TODO: Implement HashMap
