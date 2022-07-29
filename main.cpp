@@ -66,30 +66,162 @@ public:
 template <typename T1, typename T2>
 class HashMap 
 {
-
 private:
-	vector<forward_list<T2>> hashTable; //If you want to use seperate chaining, I think this will be the easiest way to implement the hashmap
+	vector<forward_list<pair<T1, T2>>> hashTable[5]; //If you want to use seperate chaining, I think this will be the easiest way to implement the hashmap
 										//But feel free to use open addressing if you want :)
+    int size;
 	double loadFactor;
+    const double maxLoadFactor = 0.8;
 public:
+    //Constructor for HashMap
+    HashMap()
+    {
+        size = 0;
+        loadFactor = 0.0;
+    }
+
+    //Hash function
+    int hasherFunc(T1 key)
+    {
+        return key % (hashTable.size() * 60) / 60;
+    }
+
+    //Creates an entirely new hashmap if load factor approached maxLoadFactor
+    void rehash()
+    {
+        vector<forward_list<pair<T1, T2>>> originalTable = hashTable;
+        hashTable.erase(hashTable.begin(), hashTable.end());
+        hashTable.size() *= 2;
+        size = 0;
+
+        for (int i = 0; i < originalTable.size(); i++)
+        {
+            if (!originalTable[i].empty())
+            {
+                for (auto itr = originalTable[i].begin(); itr != originalTable[i].end(); itr++)
+                {
+                    insert(get<0>(*itr), get<1>(*itr));
+                }
+            }
+        }
+    }
 
 	//Overloaded subscript operator that allows you to access and modify elements like this: testMap[key] = val;
+    /* NOT DONE YET
 	T2& operator[](T1 key)
 	{
+        int index = hasherFunc(key);
 
+        auto itr = find(key);
+        if (itr == hashTable[index].end())
+        {
+            insert(key, get<1>(*itr));
+        }
+        else
+        {
+
+        }
+        return ;
 	}
+     */
 
 	//Very similar to the [] operator
 	void insert(T1 key, T2 val)
 	{
+        int index = hasherFunc(key);
 
+        if (!hashTable[index].empty())
+        {
+            for (auto itr = hashTable[index].begin(); itr != hashTable[index].end(); itr++)
+            {
+                if (key == get<0>(*itr))
+                {
+                    return;
+                }
+            }
+            hashTable[index].push_back(make_pair(key, val));
+            size++;
+        }
+        else
+        {
+            hashTable[index] = {};
+            hashTable[index].push_front(make_pair(key, val));
+            size++;
+        }
+
+        loadFactor = (double) size / hashTable.size();
+        if (loadFactor == maxLoadFactor)
+        {
+            rehash();
+        }
 	}
 
 	//Removes a key from the hashmap
 	void remove(T1 key)
 	{
+        int index = hasherFunc(key);
 
+        if (!hashTable[index].empty())
+        {
+            for (auto itr = hashTable[index].begin(); itr != hashTable[index].end(); itr++)
+            {
+                if (key == get<0>(*itr))
+                {
+                    hashTable[index].remove(get<0, 1>(*itr));
+                    return;
+                }
+            }
+        }
 	}
+
+    //Finds a key from the hashmap
+    typename forward_list<pair<T1, T2>>::iterator find(T1 key)
+    {
+        int index = hasherFunc(key);
+
+        if (!hashTable[index].empty())
+        {
+            for (auto itr = hashTable[index].begin(); itr != hashTable[index].end(); itr++)
+            {
+                if (key == get<0>(*itr))
+                {
+                    return itr;
+                }
+            }
+        }
+        return hashTable[index].end();
+    }
+
+    //Returns 1 if key is found in map or 0 otherwise
+    int count(T1 key)
+    {
+        int index = hasherFunc(key);
+
+        auto itr = find(key);
+        if (itr != hashTable[index].end())
+        {
+            return 1;
+        }
+        return 0;
+    }
+
+    //Returns # of elements in table
+    int numElements()
+    {
+        return size;
+    }
+
+    //Returns bucket size
+    int bucket_count()
+    {
+        return hashTable.size();
+    }
+
+    //Returns the loadFactor
+    double load_factor()
+    {
+        return loadFactor;
+    }
 
 	//Feel free to write more functions but this is just a template to get started!
 	//You could also build an iterator if you need something to do.
