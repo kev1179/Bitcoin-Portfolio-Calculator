@@ -296,7 +296,7 @@ long generateTimeStamp(string month, string day, string year, string hour, strin
 
 //Reads the data from the csv file and places it into a hashmap.
 //Right now, we are using the STL hashmap but when we're done we will change this to our own.
-void populateMap(unordered_map<long, double>& priceMap, ifstream& data) 
+void populateMap(HashMap<long, double>& priceMap, ifstream& data) 
 {
 	string line;
 	getline(data, line);
@@ -309,14 +309,14 @@ void populateMap(unordered_map<long, double>& priceMap, ifstream& data)
 			tempVector.push_back(temp);
 		}
 		if (tempVector[1].compare("NaN") != 0) {
-			priceMap[stol(tempVector[0])] = stod(tempVector[1]);
+			priceMap.insert(stol(tempVector[0]), stod(tempVector[1]));
 		}
 		
 	}
 	cout << "DONE!" << endl;
 }
 
-/*
+
 int main()
 {
 	ifstream data("data.csv");
@@ -335,13 +335,12 @@ int main()
 	string minute;
 	string USD;
 
-	unordered_map<long, double> priceMap;
+	HashMap<long, double> priceMap;
 	populateMap(priceMap, data);
 
 	//Takes in the user input, generates a time stamp based off the time inputted.
 	//TODO: Fix ending the loop, doesn't work properly right now. If anyone knows how to fix it by all means go ahead
 	double totalBTC = 0.0;
-
 
 	while (true) 
 	{
@@ -361,7 +360,7 @@ int main()
 
 		long timeStamp = generateTimeStamp(month, day, year, hour, minute);
 		
-		double purchaseBTCPrice = priceMap[timeStamp];
+		double purchaseBTCPrice = priceMap.access(timeStamp);
 		totalBTC += stod(USD) / purchaseBTCPrice;
 
 		//cout << timeStamp << "\n";
@@ -373,8 +372,9 @@ int main()
 
 	return 0;
 }
-*/
 
+
+/*
 void heapTest()
 {
 
@@ -564,3 +564,4 @@ int main()
 
     return 0;
 }
+*/
