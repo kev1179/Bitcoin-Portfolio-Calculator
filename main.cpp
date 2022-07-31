@@ -47,7 +47,10 @@ public:
         heap[0] = heap[size - 1];
         heap.pop_back();
         size--;
-        heapifyDown(0);
+        if (isMax)
+            heapifyDown(0);
+        else
+            minHeapifyDown(0);
         return top;
 	}
 
@@ -55,7 +58,10 @@ public:
 	void insert(T val) {
         heap.push_back(val);
         size++;
-        heapifyUp(size - 1);
+        if (isMax)
+            heapifyUp(size - 1);
+        else
+            minHeapifyUp(size - 1);
 	}
 
 	void heapifyDown(int index) {
@@ -87,6 +93,39 @@ public:
             heap[index] = heap[parent];
             heap[parent] = temp;
             heapifyUp(parent);
+        }
+    }
+
+    // implement min heapify down function
+    void minHeapifyDown(int index) {
+        int left, right, smallest;
+
+        left = 2 * index + 1;
+        right = 2 * index + 2;
+        smallest = index;
+
+        if (left < size && heap[left] < heap[index])
+            smallest = left;
+        if (right < size && heap[right] < heap[smallest])
+            smallest = right;
+        if (smallest != index) {
+            T temp = heap[index];
+            heap[index] = heap[smallest];
+            heap[smallest] = temp;
+            minHeapifyDown(smallest);
+        }
+    }
+
+    // implement min heapify up function
+    void minHeapifyUp(int index) {
+        if (index == 0)
+            return;
+        int parent = (index - 1) / 2;
+        if (heap[index] < heap[parent]) {
+            T temp = heap[index];
+            heap[index] = heap[parent];
+            heap[parent] = temp;
+            minHeapifyUp(parent);
         }
     }
 
@@ -260,7 +299,11 @@ public:
 //Generates a timestamp. Works properly, has been tested using an online converter!
 long generateTimeStamp(string month, string day, string year, string hour, string minute) 
 {
-	
+    if (month[0] == '\n')
+    {
+        month.erase(month.begin());
+    }
+
 	unordered_map<string, int> months;
 	months["January"] = 0;
 	months["February"] = 1;
@@ -298,6 +341,7 @@ long generateTimeStamp(string month, string day, string year, string hour, strin
 //Right now, we are using the STL hashmap but when we're done we will change this to our own.
 void populateMap(HashMap<long, double>& priceMap, ifstream& data) 
 {
+    cout << "LOADING..." << endl;
 	string line;
 	getline(data, line);
 	vector<string> tempVector;
@@ -316,59 +360,122 @@ void populateMap(HashMap<long, double>& priceMap, ifstream& data)
 	cout << "DONE!" << endl;
 }
 
+void option1(HashMap<long, double> priceMap)
+{
+
+    cout << "Welcome to the bitcoin portfolio calculator!" << endl;
+    cout << "Enter input in the following format: Month day, year time(military) [Amount of USD spent on bitcoin on that day]" << endl;
+    cout << "Example: November 10, 2020 15:14 500.00" << endl;
+    cout << "Enter -1 followed by a space when you are finished and the calculator will tell you what your bitcoin is worth today." << endl;
+
+    double btcPrice = 22453.30; //(7/21/2022)
+
+    string month;
+    string day;
+    string year;
+    string hour;
+    string minute;
+    string USD;
+
+
+
+    //Takes in the user input, generates a time stamp based off the time inputted.
+    //TODO: Fix ending the loop, doesn't work properly right now. If anyone knows how to fix it by all means go ahead
+    double totalBTC = 0.0;
+
+    while (true)
+    {
+        getline(cin, month, ' ');
+
+        if (month.compare("-1") == 0)
+        {
+            break;
+        }
+
+        getline(cin, day, ',');
+        getline(cin, year, ' ');
+        getline(cin, year, ' ');
+        getline(cin, hour, ':');
+        getline(cin, minute, ' ');
+        getline(cin, USD, '\n');
+
+        long timeStamp = generateTimeStamp(month, day, year, hour, minute);
+
+        double purchaseBTCPrice = priceMap.access(timeStamp);
+        totalBTC += stod(USD) / purchaseBTCPrice;
+
+        //cout << timeStamp << "\n";
+        //cout << totalBTC * btcPrice << endl;
+    }
+
+    cout << "You own " << totalBTC << " total bitcoin" << endl;
+    cout << "Today, your portfolio is currently worth $" << fixed << setprecision(2) << totalBTC * btcPrice << endl;
+}
+
+void option2(ifstream& data)
+{
+    Heap<double> maxPrices("max");
+    Heap<double> minPrices("min");
+    cout << "Enter two dates(first date must be before the second)" << endl;
+    cout << "Enter input in the following format: Month day, year time(military)" << endl;
+    cout << "Example: November 10, 2020 15:14" << endl;
+    cout << "The calculator will then tell you the top 10 highest and lowest Bitcoin prices on that interval." << endl;
+
+    long timeStamp1 = 0;
+    long timeStamp2 = 0;
+
+    string month;
+    string day;
+    string year;
+    string hour;
+    string minute;
+
+    for (int i = 0; i < 2; i++)
+    {
+        getline(cin, month, ' ');
+        getline(cin, day, ',');
+        getline(cin, year, ' ');
+        getline(cin, year, ' ');
+        getline(cin, hour, ':');
+        getline(cin, minute, '\n');
+
+        if (i == 0)
+        {
+            timeStamp1 = generateTimeStamp(month, day, year, hour, minute);
+        }
+        else
+        {
+            timeStamp2 = generateTimeStamp(month, day, year, hour, minute);
+        }
+        
+    }
+    long startPoint = (timeStamp1 - 1325317920) / 60;
+    long endPoint = (timeStamp2 - 1325317920) / 60;
+
+}
 
 int main()
 {
 	ifstream data("data.csv");
 
-	cout << "Welcome to the bitcoin portfolio calculator!" << endl;
-	cout << "Enter input in the following format: Month day, year time(military) [Amount of USD spent on bitcoin on that day]" << endl;
-	cout << "Example: November 10, 2020 15:14 500.00" << endl;
-	cout << "Enter -1 followed by a space when you are finished and the calculator will tell you what your bitcoin is worth today." << endl;
+    HashMap<long, double> priceMap;
+    populateMap(priceMap, data);
+    int option;
 
-	double btcPrice = 22453.30; //(7/21/2022)
+    cout << "Pick the feature you would like to use: " << endl;
+    cout << "1. Bitcoin Portfolio calculator (Implemented via hashmap)" << endl;
+    cout << "2. Top 10 highest and lowest prices on an interval (implemented via heap)" << endl;
+    cin >> option;
 
-	string month;
-	string day;
-	string year;
-	string hour;
-	string minute;
-	string USD;
-
-	HashMap<long, double> priceMap;
-	populateMap(priceMap, data);
-
-	//Takes in the user input, generates a time stamp based off the time inputted.
-	//TODO: Fix ending the loop, doesn't work properly right now. If anyone knows how to fix it by all means go ahead
-	double totalBTC = 0.0;
-
-	while (true) 
-	{
-		getline(cin, month, ' ');
-
-		if (month.compare("-1") == 0) 
-		{
-			break;
-		}
-
-		getline(cin, day, ',');
-		getline(cin, year, ' ');
-		getline(cin, year, ' ');
-		getline(cin, hour, ':');
-		getline(cin, minute, ' ');
-		getline(cin, USD, '\n');
-
-		long timeStamp = generateTimeStamp(month, day, year, hour, minute);
-		
-		double purchaseBTCPrice = priceMap.access(timeStamp);
-		totalBTC += stod(USD) / purchaseBTCPrice;
-
-		//cout << timeStamp << "\n";
-		//cout << totalBTC * btcPrice << endl;
-	}
-	
-	cout << "You own " << totalBTC << " total bitcoin" << endl;
-	cout <<  "Today, your portfolio is currently worth $" << fixed << setprecision(2) << totalBTC * btcPrice << endl;
+    if (option == 1)
+    {
+        option1(priceMap);
+    }
+    else
+    {
+        option2(data);
+    }
+    
 
 	return 0;
 }
@@ -377,22 +484,18 @@ int main()
 /*
 void heapTest()
 {
-
     int casesPassed = 0;
     //******************************** CASE 1 *****************************************************************
     Heap<double> test1("max");
     priority_queue<double> test1STL;
     vector<double> values = { 8.2, 100.8, 23.4, 54.1, 1000.0, 121.4, 8.1, 11.0, 7.9, 234.8 };
-
     for (int i = 0; i < values.size(); i++)
     {
         test1.insert(values[i]);
         test1STL.push(values[i]);
     }
-
     vector<double> sorted1;
     vector<double> sorted1STL;
-
     while (!test1STL.empty())
     {
         sorted1.push_back(test1.extractTop());
@@ -400,7 +503,6 @@ void heapTest()
         test1STL.pop();
         sorted1STL.push_back(temp);
     }
-
     if (sorted1 != sorted1STL)
     {
         cout << "CASE 1 FAILED: max heap sort" << endl;
@@ -409,7 +511,6 @@ void heapTest()
     {
         casesPassed++;
     }
-
     //*********************************************** CASE 2 ***********************************************
     Heap<double> test2("max");
     test2.insert(3.14);
@@ -419,7 +520,6 @@ void heapTest()
     test2.insert(3.12);
     test2.insert(3.13999);
     test2.insert(3.1401);
-
     if (test2.extractTop() == 3.141)
     {
         casesPassed++;
@@ -428,7 +528,6 @@ void heapTest()
     {
         cout << "CASE 2 FAILED: extracting top in a max heap" << endl;
     }
-
     //******************************************** CASE 3 *********************************************
     Heap<double> test3("max");
     test3.insert(12.6);
@@ -441,15 +540,12 @@ void heapTest()
     test3.extractTop();
     test3.extractTop();
     test3.insert(50.8);
-
     vector<double> answer = { 50.8, 1.24 };
     vector<double> testing3;
-
     while (!test3.empty())
     {
         testing3.push_back(test3.extractTop());
     }
-
     if (answer == testing3)
     {
         casesPassed++;
@@ -458,21 +554,17 @@ void heapTest()
     {
         cout << "CASE 3 FAILED: mixing insertions and deletions " << endl;
     }
-
     //************************************************** CASE 4 ******************************************************
     Heap<double> test4("min");
     priority_queue<double, vector<double>, greater<double>> test4STL;
     vector<double> values2 = { 8.2, 100.8, 23.4, 54.1, 1000.0, 121.4, 8.1, 11.0, 7.9, 234.8 };
-
     for (int i = 0; i < values2.size(); i++)
     {
         test4.insert(values2[i]);
         test4STL.push(values2[i]);
     }
-
     vector<double> sorted4;
     vector<double> sorted4STL;
-
     while (!test4STL.empty())
     {
         sorted4.push_back(test4.extractTop());
@@ -480,7 +572,6 @@ void heapTest()
         test4STL.pop();
         sorted4STL.push_back(temp);
     }
-
     if (sorted4 != sorted4STL)
     {
         cout << "CASE 4 FAILED: min heap sort" << endl;
@@ -489,7 +580,6 @@ void heapTest()
     {
         casesPassed++;
     }
-
     //*********************************************** CASE 5 ***********************************************
     Heap<double> test5("min");
     test5.insert(3.14);
@@ -499,7 +589,6 @@ void heapTest()
     test5.insert(3.12);
     test5.insert(3.13999);
     test5.insert(3.1401);
-
     if (test5.extractTop() == 3.12)
     {
         casesPassed++;
@@ -508,7 +597,6 @@ void heapTest()
     {
         cout << "CASE 5 FAILED: extracting top in a min heap" << endl;
     }
-
     //******************************************** CASE 6 *********************************************
     Heap<double> test6("min");
     test6.insert(12.6);
@@ -521,15 +609,12 @@ void heapTest()
     test6.extractTop();
     test6.extractTop();
     test6.insert(50.8);
-
     vector<double> answer6 = { 50.8, 100.89 };
     vector<double> testing6;
-
     while (!test6.empty())
     {
         testing6.push_back(test6.extractTop());
     }
-
     if (answer6 == testing6)
     {
         casesPassed++;
@@ -538,10 +623,8 @@ void heapTest()
     {
         cout << "CASE 6 FAILED: mixing insertions and deletions in min heap" << endl;
     }
-
     cout << "Passed " << casesPassed << "/6 cases" << endl;
 }
-
 void mapTest()
 {
     int casesPassed = 0;
@@ -553,7 +636,6 @@ void mapTest()
     cout << test1.access(1597262340) << endl;
     test1.print();
 }
-
 int main()
 {
     cout << "Heap test cases: " << endl;
@@ -561,7 +643,6 @@ int main()
     cout << "****************************************************************************************************************" << endl;
     cout << "Hashmap test cases: " << endl;
     mapTest();
-
     return 0;
 }
 */
