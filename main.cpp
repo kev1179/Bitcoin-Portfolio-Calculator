@@ -544,7 +544,7 @@ void option2(ifstream& data)
         cout << i << ": " << minPrices.extractTop() << endl;
     }
 }
-/*
+
 int main()
 {
 	ifstream data("data.csv");
@@ -594,7 +594,7 @@ int main()
 
 	return 0;
 }
-*/
+
 
 
 //******************************************************* CODE FOR TESTING ONLY *********************************************************
@@ -743,7 +743,7 @@ void heapTest()
     }
     cout << "Passed " << casesPassed << "/6 cases" << endl;
 }
- */
+ 
 void mapTest()
 {
     int casesPassed = 0;
@@ -775,3 +775,4 @@ int main()
     mapTest();
     return 0;
 }
+*/
