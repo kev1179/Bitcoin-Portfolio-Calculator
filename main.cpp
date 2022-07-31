@@ -64,6 +64,7 @@ public:
             minHeapifyUp(size - 1);
 	}
 
+    //Create heapify down function
 	void heapifyDown(int index) {
 	    int left, right, largest;
 
@@ -83,7 +84,7 @@ public:
         }
     }
 
-    // create heapify up function
+    //Create heapify up function
     void heapifyUp(int index) {
         if (index == 0)
             return;
@@ -96,7 +97,7 @@ public:
         }
     }
 
-    // implement min heapify down function
+    //Implement min heapify down function
     void minHeapifyDown(int index) {
         int left, right, smallest;
 
@@ -116,7 +117,7 @@ public:
         }
     }
 
-    // implement min heapify up function
+    //Implement min heapify up function
     void minHeapifyUp(int index) {
         if (index == 0)
             return;
@@ -129,6 +130,7 @@ public:
         }
     }
 
+    //Checks if heap is empty
     bool empty()
     {
         if (size == 0)
@@ -152,14 +154,28 @@ public:
         this->value = value;
     }
 
+    //Returns key of entry (timestamp)
     T1& getKey()
     {
         return key;
     }
 
+    //Returns value of entry (bitcoin price)
     T2& getValue()
     {
         return value;
+    }
+
+    //Sets current key to new key
+    void setKey(T1 newKey)
+    {
+        key = newKey;
+    }
+
+    //Sets current value to new value
+    void setValue(T2 newValue)
+    {
+        value = newValue;
     }
 };
 
@@ -215,9 +231,17 @@ public:
 	{
         int index = hasherFunc(key);
 
-        Entry<T1, T2> entry(key, val);
-        hashTable[index].push_back(entry);
-        size++;
+        auto itr = find(key, index);
+        if (itr == hashTable[index].end())
+        {
+            Entry<T1, T2> entry(key, val);
+            hashTable[index].push_back(entry);
+            size++;
+        }
+        else
+        {
+            itr->setValue(val);
+        }
 
         double loadFactor = (double) size / hashTable.size();
         if (loadFactor >= maxLoadFactor)
@@ -250,6 +274,7 @@ public:
         if (itr != hashTable[index].end())
         {
             hashTable[index].erase(itr);
+            size--;
         }
 	}
 
@@ -267,6 +292,16 @@ public:
             }
         }
         return hashTable[index].end();
+    }
+
+    //Checks if hashmap is empty
+    bool isEmpty()
+    {
+        if (size == 0)
+        {
+            return true;
+        }
+        return false;
     }
 
     //Prints all entries from hashmap
@@ -453,7 +488,7 @@ void option2(ifstream& data)
     long endPoint = (timeStamp2 - 1325317920) / 60;
 
 }
-
+/*
 int main()
 {
 	ifstream data("data.csv");
@@ -479,7 +514,7 @@ int main()
 
 	return 0;
 }
-
+*/
 
 /*
 void heapTest()
@@ -625,24 +660,34 @@ void heapTest()
     }
     cout << "Passed " << casesPassed << "/6 cases" << endl;
 }
+ */
 void mapTest()
 {
     int casesPassed = 0;
     //******************************** CASE 1 *****************************************************************
     HashMap<long,double> test1;
     test1.insert(1597262280, 11581.939197);
+    test1.insert(1597262280, 11500.999999);
     test1.insert(1597262340, 11572.065746);
+    test1.insert(1325317920, 4.39);
+    test1.print();
     cout << test1.access(8237489273492) << endl;
     cout << test1.access(1597262340) << endl;
+    cout << test1.access(1597262280) << endl;
+    test1.insert(1325346600, 4.39);
+    test1.print();
+    cout << test1.isEmpty() << endl;
+    test1.remove(1325346600);
+    test1.remove(2838273827382);
+    test1.remove(1597262340);
     test1.print();
 }
 int main()
 {
-    cout << "Heap test cases: " << endl;
-    heapTest();
-    cout << "****************************************************************************************************************" << endl;
+    //cout << "Heap test cases: " << endl;
+    //heapTest();
+    //cout << "****************************************************************************************************************" << endl;
     cout << "Hashmap test cases: " << endl;
     mapTest();
     return 0;
 }
-*/
