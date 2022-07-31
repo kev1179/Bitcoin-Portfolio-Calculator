@@ -345,14 +345,17 @@ void populateMap(HashMap<long, double>& priceMap, ifstream& data)
 	string line;
 	getline(data, line);
 	vector<string> tempVector;
-	while (getline(data, line)) {
+	while (getline(data, line)) 
+    {
 		tempVector.clear();
 		stringstream stream(line);
 		string temp;
-		while (getline(stream, temp, ',')) {
+		while (getline(stream, temp, ',')) 
+        {
 			tempVector.push_back(temp);
 		}
-		if (tempVector[1].compare("NaN") != 0) {
+		if (tempVector[1].compare("NaN") != 0) 
+        {
 			priceMap.insert(stol(tempVector[0]), stod(tempVector[1]));
 		}
 		
@@ -412,6 +415,41 @@ void option1(HashMap<long, double> priceMap)
     cout << "Today, your portfolio is currently worth $" << fixed << setprecision(2) << totalBTC * btcPrice << endl;
 }
 
+void buildHeap(Heap<double>& heap, ifstream& data, long start, long end)
+{
+    cout << "LOADING..." << endl;
+    string line;
+    getline(data, line);
+    vector<string> tempVector;
+    int count = 0;
+
+    while (getline(data, line))
+    {
+        if (count >= start && count <= end)
+        {
+            tempVector.clear();
+            stringstream stream(line);
+            string temp;
+            while (getline(stream, temp, ','))
+            {
+                tempVector.push_back(temp);
+            }
+            if (tempVector[1].compare("NaN") != 0)
+            {
+                heap.insert(stod(tempVector[1]));
+            }
+
+        }
+        else if (count > end)
+        {
+            break;
+        }
+        count++;
+    }
+
+    cout << "DONE!" << endl;
+}
+
 void option2(ifstream& data)
 {
     Heap<double> maxPrices("max");
@@ -452,6 +490,24 @@ void option2(ifstream& data)
     long startPoint = (timeStamp1 - 1325317920) / 60;
     long endPoint = (timeStamp2 - 1325317920) / 60;
 
+    buildHeap(maxPrices, data, startPoint, endPoint);
+    data.close();
+    data.open("data.csv");
+    buildHeap(minPrices, data, startPoint, endPoint);
+
+    cout << "Top 10 highest prices: " << endl;
+
+    for (int i = 1; i <= 10; i++)
+    {
+        cout << i << ": " << maxPrices.extractTop() << endl;
+    }
+
+    cout << "\nTop 10 lowest prices: " << endl;
+
+    for (int i = 1; i <= 10; i++)
+    {
+        cout << i << ": " << minPrices.extractTop() << endl;
+    }
 }
 
 int main()
@@ -460,26 +516,53 @@ int main()
 
     HashMap<long, double> priceMap;
     populateMap(priceMap, data);
-    int option;
+    data.close();
+    data.open("data.csv");
+    int count = 0;
 
-    cout << "Pick the feature you would like to use: " << endl;
-    cout << "1. Bitcoin Portfolio calculator (Implemented via hashmap)" << endl;
-    cout << "2. Top 10 highest and lowest prices on an interval (implemented via heap)" << endl;
-    cin >> option;
+    while (true)
+    {
+        int option;
 
-    if (option == 1)
-    {
-        option1(priceMap);
+        if (count == 0)
+        {
+            cout << "Pick the feature you would like to use: " << endl;
+            cout << "1. Bitcoin Portfolio calculator (Implemented via hashmap)" << endl;
+            cout << "2. Top 10 highest and lowest prices on an interval (implemented via heap)" << endl;
+        }
+        else
+        {
+            cout << "If you would like to continue, pick the feature you would like to use: " << endl;
+            cout << "1. Bitcoin Portfolio calculator (Implemented via hashmap)" << endl;
+            cout << "2. Top 10 highest and lowest prices on an interval (implemented via heap)" << endl;
+            cout << "Enter -1 if you would like to exit" << endl;
+        }
+
+        cin >> option;
+
+        if (option == 1)
+        {
+            option1(priceMap);
+        }
+        else if(option == 2)
+        {
+            option2(data);
+        }
+        else
+        {
+            break;
+        }
+        count++;
     }
-    else
-    {
-        option2(data);
-    }
+
     
 
 	return 0;
 }
 
+
+
+//******************************************************* CODE FOR TESTING ONLY *********************************************************
 
 /*
 void heapTest()
@@ -636,6 +719,7 @@ void mapTest()
     cout << test1.access(1597262340) << endl;
     test1.print();
 }
+
 int main()
 {
     cout << "Heap test cases: " << endl;
