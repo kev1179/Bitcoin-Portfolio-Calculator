@@ -13,7 +13,7 @@
 
 using namespace std;
 
-//TODO: Implement Heap
+//Heap implemented by Audrey. Can function as a min or max heap depending on the parameter passed in via constructor
 template <typename T>
 class Heap {
 private:
@@ -23,7 +23,8 @@ private:
 	int size;
 public:
 	//Constructor for heap, specifies which type of heap it is and sets a boolean variable for you to use later.
-	Heap(string type) {
+	Heap(string type) 
+    {
 		heap = {};
 		this->type = type;
 		size = 0;
@@ -41,8 +42,9 @@ public:
     }
 		
 
-	//Takes out the element at the top and returns it. Here you would need to implement heapify down which can be found in the slides.
-	T extractTop() {
+	//Takes out the element at the top and returns it. Also performs heapify down
+	T extractTop() 
+    {
         T top = heap[0];
         heap[0] = heap[size - 1];
         heap.pop_back();
@@ -52,6 +54,8 @@ public:
         else
             minHeapifyDown(0);
         return top;
+
+        //SOURCE: heaps slide 41
 	}
 
 	//Inserts an element into the heap. Here you would need to write heapify up which can also be found in the slides.
@@ -62,6 +66,8 @@ public:
             heapifyUp(size - 1);
         else
             minHeapifyUp(size - 1);
+
+        //SOURCE: heaps slide 26
 	}
 
     //Create heapify down function
@@ -82,6 +88,8 @@ public:
             heap[largest] = temp;
             heapifyDown(largest);
         }
+
+        //SOURCE: heaps slide 41
     }
 
     //Create heapify up function
@@ -95,6 +103,7 @@ public:
             heap[parent] = temp;
             heapifyUp(parent);
         }
+        //SOURCE: heaps slide 26
     }
 
     //Implement min heapify down function
@@ -115,6 +124,7 @@ public:
             heap[smallest] = temp;
             minHeapifyDown(smallest);
         }
+        //SOURCE: heaps slide 41
     }
 
     //Implement min heapify up function
@@ -128,6 +138,7 @@ public:
             heap[parent] = temp;
             minHeapifyUp(parent);
         }
+        //SOURCE: heaps slide 26
     }
 
     //Checks if heap is empty
@@ -139,8 +150,15 @@ public:
         }
         return false;
     }
+
+    //Returns size of heap
+    int size()
+    {
+        return this->size;
+    }
 };
 
+//Helper class for the Hashmap. These are the key-value pairs inserted into the map.
 template <typename T1, typename T2>
 class Entry
 {
@@ -179,7 +197,7 @@ public:
     }
 };
 
-//TODO: Implement HashMap
+//Hashmap implemented by Marcos. Achieved using seperate chaining method
 template <typename T1, typename T2>
 class HashMap
 {
@@ -331,7 +349,8 @@ public:
     }
 };
 
-//Generates a timestamp. Works properly, has been tested using an online converter!
+//Converts a date and time from EST to UNIX time which is a system that measures time in terms of a timecode given in seconds
+//We had to create this because that was the way our data measured time
 long generateTimeStamp(string month, string day, string year, string hour, string minute) 
 {
     if (month[0] == '\n')
@@ -373,7 +392,6 @@ long generateTimeStamp(string month, string day, string year, string hour, strin
 }
 
 //Reads the data from the csv file and places it into a hashmap.
-//Right now, we are using the STL hashmap but when we're done we will change this to our own.
 void populateMap(HashMap<long, double>& priceMap, ifstream& data) 
 {
     cout << "LOADING..." << endl;
@@ -398,7 +416,8 @@ void populateMap(HashMap<long, double>& priceMap, ifstream& data)
 	cout << "DONE!" << endl;
 }
 
-void option1(HashMap<long, double> priceMap)
+//Performs Bitcoin price calculations
+void option1(HashMap<long, double>& priceMap)
 {
 
     cout << "Welcome to the bitcoin portfolio calculator!" << endl;
@@ -450,6 +469,7 @@ void option1(HashMap<long, double> priceMap)
     cout << "Today, your portfolio is currently worth $" << fixed << setprecision(2) << totalBTC * btcPrice << endl;
 }
 
+//Helper function that builds a heap in place by looping through the interval specified in the file
 void buildHeap(Heap<double>& heap, ifstream& data, long start, long end)
 {
     cout << "LOADING..." << endl;
@@ -485,6 +505,7 @@ void buildHeap(Heap<double>& heap, ifstream& data, long start, long end)
     cout << "DONE!" << endl;
 }
 
+//Calculates the top 10 highest and lowest prices on a given interval of time
 void option2(ifstream& data)
 {
     Heap<double> maxPrices("max");
@@ -545,6 +566,7 @@ void option2(ifstream& data)
     }
 }
 
+//Where user input occurs
 int main()
 {
 	ifstream data("data.csv");
